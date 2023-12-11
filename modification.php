@@ -129,6 +129,15 @@ $_SESSION['user_id'] = $row['id']; ?>
         </a>
       </li>
       <li>
+      <a href="youtube.php">
+        <svg>
+          <use xlink:href="#users"></use>
+         </svg>
+         
+        <span>Compteur Youtube</span>
+      </a>
+      </li>
+      <li>
       <a href="deco.php">
         <svg>
           <use xlink:href="#users"></use>

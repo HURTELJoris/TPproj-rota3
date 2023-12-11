@@ -1,6 +1,6 @@
+
 <?php session_start();
 $_SESSION['user_id'] = $row['id']; ?>
-
 <link rel="stylesheet" href="./stylee.css">
 <svg style="display:none;">
   <symbol id="logo" viewBox="0 0 140 59">
@@ -87,6 +87,7 @@ $_SESSION['user_id'] = $row['id']; ?>
 <header class="page-header">
   <nav>
     
+    </a>
     <button class="toggle-mob-menu" aria-expanded="false" aria-label="open menu">
       <svg width="20" height="20" aria-hidden="true">
         <use xlink:href="#down"></use>
@@ -94,8 +95,9 @@ $_SESSION['user_id'] = $row['id']; ?>
     </button>
     <ul class="admin-menu">
       <li class="menu-heading">
-      <h3>MENU</h3>
+        <h3>MENU</h3>
       </li>
+      
       <li>
         <a href="user.php">
           <svg>
@@ -142,6 +144,7 @@ $_SESSION['user_id'] = $row['id']; ?>
         <svg>
           <use xlink:href="#users"></use>
          </svg>
+         
         <span>Déconnexion</span>
       </a>
       </li>
@@ -176,29 +179,103 @@ $_SESSION['user_id'] = $row['id']; ?>
     </form>
     <div class="admin-profile">
       <span class="greeting">Hello <?php echo  $_SESSION["logname"];?></span>
+      
       <div class="notifications">
         <span class="badge">1</span>
+        
         <svg>
           <use xlink:href="#users"></use>
         </svg>
       </div>
     </div>
-  </section>
-  <section class="grid">
-    
-    <?php include 'supprimer.php'; ?>
+  </section><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nombre d'abonnés YouTube</title>
+    <style>
+        body {
+            background-color: #1a1a1a; /* Couleur de fond sombre */
+            color: #ffffff; /* Couleur du texte */
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
 
-  </section>
-  
-  <footer class="page-footer">
-    <span>made by </span>
-    <a href="https://georgemartsoukos.com/" target="_blank">
-      <img width="24" height="24" src="https://assets.codepen.io/162656/george-martsoukos-small-logo.svg" alt="George Martsoukos logo">
-    </a>
-    <script  src="./scriptt.js"></script>
-  </footer>
-</section>
-<?php
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
 
-?>
+        p {
+            font-size: 1.5em;
+        }
 
+        img {
+            max-width: 300px;
+            border-radius: 50%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Nombre d'abonnés YouTube</h1>
+<img id="channelImage" src="" alt="Photo de profil">
+<p id="channelName">Chargement...</p>
+<p id="subscriberCount">Chargement...</p>
+
+<script>
+    const apiKey = "AIzaSyA85gTJ6um9Gan1VjOnf4_12gUlDhdkwU4";
+    const channelId = "UCrVnM4qoAn7NA5MBZpI4QeA"; // Remplacez ceci par l'ID de votre chaîne YouTube
+
+    function getChannelInfo() {
+        const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
+
+        fetch(channelUrl)
+            .then(response => response.json())
+            .then(data => {
+                const channelName = data.items[0].snippet.title;
+                const channelImage = data.items[0].snippet.thumbnails.high.url;
+
+                document.getElementById("channelName").textContent = `Nom de la chaîne : ${channelName}`;
+                document.getElementById("channelImage").src = channelImage;
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des informations de la chaîne :", error);
+                document.getElementById("channelName").textContent = "Erreur lors de la récupération des informations de la chaîne.";
+            });
+    }
+
+    function getSubscriberCount() {
+        const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const subscriberCount = data.items[0].statistics.subscriberCount;
+                document.getElementById("subscriberCount").textContent = `Nombre d'abonnés actuel : ${subscriberCount}`;
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération du nombre d'abonnés :", error);
+                document.getElementById("subscriberCount").textContent = "Erreur lors de la récupération du nombre d'abonnés.";
+            });
+    }
+
+    // Mettre à jour toutes les 3 secondes (ou ajustez selon vos besoins)
+    setInterval(() => {
+        getChannelInfo();
+        getSubscriberCount();
+    }, 3000);
+
+    // Charger le nom de la chaîne, la photo de profil et le nombre d'abonnés au chargement de la page
+    window.onload = () => {
+        getChannelInfo();
+        getSubscriberCount();
+    };
+</script>
+
+</body>
+</html>
