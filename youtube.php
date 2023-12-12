@@ -222,6 +222,7 @@ $_SESSION['user_id'] = $row['id']; ?>
 </head>
 <body>
 
+<!-- HTML -->
 <h1>Nombre d'abonnés YouTube</h1>
 <img id="channelImage" src="" alt="Photo de profil">
 <p id="channelName">Chargement...</p>
@@ -229,7 +230,15 @@ $_SESSION['user_id'] = $row['id']; ?>
 
 <script>
     const apiKey = "AIzaSyA85gTJ6um9Gan1VjOnf4_12gUlDhdkwU4";
-    const channelId = "UCrVnM4qoAn7NA5MBZpI4QeA"; // Remplacez ceci par l'ID de votre chaîne YouTube
+    const channelId = "UCrVnM4qoAn7NA5MBZpI4QeA";
+    
+    // Connexion WebSocket
+    const socket = new WebSocket('ws://192.168.64.142:667');  // Assurez-vous que le port correspond à celui du serveur WebSocket C++
+
+    // Fonction pour envoyer des informations au serveur WebSocket
+    function sendInfoToCpp(info) {
+        socket.send(info);
+    }
 
     function getChannelInfo() {
         const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
@@ -242,6 +251,9 @@ $_SESSION['user_id'] = $row['id']; ?>
 
                 document.getElementById("channelName").textContent = `Nom de la chaîne : ${channelName}`;
                 document.getElementById("channelImage").src = channelImage;
+
+                // Envoyer le nom de la chaîne au serveur C++
+                sendInfoToCpp(`Nom de la chaîne : ${channelName}`);
             })
             .catch(error => {
                 console.error("Erreur lors de la récupération des informations de la chaîne :", error);
@@ -257,6 +269,9 @@ $_SESSION['user_id'] = $row['id']; ?>
             .then(data => {
                 const subscriberCount = data.items[0].statistics.subscriberCount;
                 document.getElementById("subscriberCount").textContent = `Nombre d'abonnés actuel : ${subscriberCount}`;
+
+                // Envoyer le nombre d'abonnés au serveur C++
+                sendInfoToCpp(`Nombre d'abonnés actuel : ${subscriberCount}`);
             })
             .catch(error => {
                 console.error("Erreur lors de la récupération du nombre d'abonnés :", error);
@@ -276,6 +291,8 @@ $_SESSION['user_id'] = $row['id']; ?>
         getSubscriberCount();
     };
 </script>
+
+
 
 </body>
 </html>
