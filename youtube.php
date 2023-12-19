@@ -231,15 +231,22 @@ $_SESSION['user_id'] = $row['id']; ?>
     <img id="channelImage" src="" alt="Photo de profil">
     <p id="channelName">Chargement...</p>
     <p id="subscriberCount">Chargement...</p>
+    <p id="APIKeys">Fonction API Keys : False, Chargement...</p> <!-- A enlever pour la version finale -->
+    <p id="NBRequetes">Chargement...</p> <!-- A enlever pour la version finale -->
 
     <script>
       // Informations concernant l'API
       const apiKey1 = "AIzaSyAmTs9KwHabkrc65xzdXbaMN7Wnkm_io44";
       const apiKey2 = "AIzaSyA85gTJ6um9Gan1VjOnf4_12gUlDhdkwU4";
-      let apiKey = parseInt(localStorage.getItem('apiKey'));
+      let apiKey = localStorage.getItem('apiKey');
+      //document.getElementById("APIKeys").textContent = `Fonction API Keys : False, ${apiKey}`; //On vérifie qu'on charge bien l'apiKey avec la valeur locale.
 
       const channelId = "UCXH88XOJR72jvzglmLIOleQ"; //ID : Douzzy Abozo
       const channelId2 = "UCrVnM4qoAn7NA5MBZpI4QeA"; //ID : Julien Code
+
+      let NBRequete = parseInt(localStorage.getItem('NBRequete')) /*|| 2*/ ;
+      //document.getElementById("NBRequetes").textContent = `Nombre de requêtes : ${localStorage.getItem('NBRequete')}` // Sert à tester si on charge bien NBRequete avec la valeur locale.
+
 
       // Connexion WebSocket
       const socket = new WebSocket('ws://192.168.64.142:667');
@@ -249,86 +256,87 @@ $_SESSION['user_id'] = $row['id']; ?>
         socket.send(info);
       }
 
-      let NBRequete = parseInt(localStorage.getItem('NBRequete')) || 2;
 
-      // Fonction pour réinitialiser le nombre de requêtes tous les jours à minuit
+      // Fait un switch key pour avoir les deux API et 20000 queries (19600)
+      function checkAndUpdateApiKey() {
+        if (NBRequete >= 9800) {
+          apiKey = apiKey2;
+          localStorage.setItem('apiKey', apiKey2);
+          document.getElementById("APIKeys").textContent = "Fonction API Keys : True, Key 2"; // A enlever pour la version finale
+        } else {
+          apiKey = apiKey1;
+          localStorage.setItem('apiKey', apiKey1);
+          document.getElementById("APIKeys").textContent = "Fonction API Keys : True, Key 1"; // A enlever pour la version finale
+        }
+
+      }
+
+
+      // Fonction pour réinitialiser le nombre de requêtes tous les jours à minuit, ou l'incrémenter à chaque fois qu'on fait une nouvelle demande d'API.
       function resetAutoIncrementValue() {
         const currentDate = new Date();
         if (currentDate.getHours() === 0 && currentDate.getMinutes() === 0) {
           NBRequete = 2;
           localStorage.setItem('NBRequete', NBRequete);
-        }
-      }
-      resetAutoIncrementValue();
-
-      // Fait un switch key pour avoir les deux API et 20000 queries
-      function checkAndUpdateApiKey() {
-        if (NBRequete >= 9800) {
-          apiKey = apiKey2;
-          localStorage.setItem('apiKey', apiKey2);
         } else {
-          apiKey = apiKey1;
-          localStorage.setItem('apiKey', apiKey1);
+          NBRequete += 2;
+          localStorage.setItem('NBRequete', NBRequete);
+        }
+        document.getElementById("NBRequetes").textContent = `Nombre de requêtes : ${localStorage.getItem('NBRequete')}`;
+      }
+
+      /* 
+        Fonction la plus importante. Cette fonction est importée de l'API de Google Cloud. 
+        Elle sert à chercher les informations d'une chaîne youtube donnée avec un ID et une clé d'API.
+        Nous l'avons modifié dans notre code pour qu'elle marche avec une Promise.
+        Le but de cette Promise est de permetre à la fonction updateData() d'attendre que l'API ait bien renvoyé les informations pour les afficher.
+      */
+      async function getChannelInfo() {
+        return new Promise((resolve, reject) => {
+          const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
+          fetch(channelUrl)
+            .then(response => response.json())
+            .then(data => {
+              const channelName = data.items[0].snippet.title;
+              const channelImage = data.items[0].snippet.thumbnails.high.url;
+
+              document.getElementById("channelName").textContent = `Nom de la chaîne : ${channelName}`;
+              document.getElementById("channelImage").src = channelImage;
+
+              sendInfoToCpp(`Nom de la chaîne : ${channelName}`);
+              resolve();
+            })
+
+          const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              const subscriberCount = data.items[0].statistics.subscriberCount;
+              document.getElementById("subscriberCount").textContent = `Nombre d'abonnés actuel : ${subscriberCount}`;
+              sendInfoToCpp(`Nombre d'abonnés actuel : ${subscriberCount}`);
+              resolve();
+            })
+            .catch(error => {
+              console.error("Erreur lors de la récupération des informations de la chaîne :", error);
+              reject(error);
+            });
+        });
+      }
+
+
+      // Fonction principale du programme. Sert a appeller toutes les autres fonctions.
+      async function updateData() {
+        try {
+          checkAndUpdateApiKey();
+          resetAutoIncrementValue();
+          await getChannelInfo();
+        } catch (error) {
+          console.error("Erreur lors de la mise à jour des données :", error);
         }
       }
-      checkAndUpdateApiKey();
 
-
-      function getChannelInfo() {
-        const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
-
-        fetch(channelUrl)
-          .then(response => response.json())
-          .then(data => {
-            const channelName = data.items[0].snippet.title;
-            const channelImage = data.items[0].snippet.thumbnails.high.url;
-
-            document.getElementById("channelName").textContent = `Nom de la chaîne : ${channelName}`;
-            document.getElementById("channelImage").src = channelImage;
-
-            sendInfoToCpp(`Nom de la chaîne : ${channelName}`);
-          })
-          .catch(error => {
-            console.error("Erreur lors de la récupération des informations de la chaîne :", error);
-            // document.getElementById("channelName").textContent = "Erreur lors de la récupération des informations de la chaîne.";
-          });
-      }
-
-
-      function getSubscriberCount() {
-        const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
-
-        fetch(url)
-          .then(response => response.json())
-          .then(data => {
-            const subscriberCount = data.items[0].statistics.subscriberCount;
-            document.getElementById("subscriberCount").textContent = `Nombre d'abonnés actuel : ${subscriberCount}`;
-
-            // Envoyer le nombre d'abonnés au serveur C++
-            sendInfoToCpp(`Nombre d'abonnés actuel : ${subscriberCount}`);
-          })
-          .catch(error => {
-            console.error("Erreur lors de la récupération du nombre d'abonnés :", error);
-            // document.getElementById("subscriberCount").textContent = "Erreur lors de la récupération du nombre d'abonnés.";
-          });
-      }
-
-// AJOUTER UNE PROMISE POUR CHECKER SI LES INFOS DES DEUX FONCTIONS SONT BIEN RECUES
-// AJOUTER UNE PROMISE
-// AJOUTER UNE PROMISE
-// AJOUTER UNE PROMISE
-
-      // Mettre à jour toutes les 3 secondes (ou ajustez selon vos besoins)
-      setInterval(() => {
-        getChannelInfo();
-        getSubscriberCount();
-      }, 10000);
-
-      // Charger le nom de la chaîne, la photo de profil et le nombre d'abonnés au chargement de la page
-      window.onload = () => {
-        getChannelInfo();
-        getSubscriberCount();
-      };
+      window.onload = updateData;
+      setInterval(updateData, 10000);
     </script>
   </body>
   </html>
