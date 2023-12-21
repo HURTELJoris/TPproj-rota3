@@ -1,4 +1,5 @@
-Projet de Communication Web-Console avec API YouTube
+#Projet de Communication Web-Console avec API YouTube
+
 Introduction
 Bienvenue dans notre projet de communication entre une interface homme-machine (IHM) web et une console en C++. L'objectif principal de ce projet est de faciliter l'échange d'informations entre ces deux interfaces en utilisant l'API YouTube. Plus précisément, nous avons mis en place une fonctionnalité permettant de récupérer le nombre d'abonnés d'une chaîne YouTube spécifique.
 
