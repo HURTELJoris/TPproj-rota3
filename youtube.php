@@ -371,5 +371,6 @@ $_SESSION['user_id'] = $row['id']; ?>
       */
     </script>
   </body>
+  <script  src="./scriptt.js"></script>
 
   </html>
