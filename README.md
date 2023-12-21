@@ -37,3 +37,6 @@ Suivez les instructions spécifiques à votre compilateur pour configurer votre 
 Utilisez l'IHM web pour entrer le nom de la chaîne YouTube dont vous souhaitez récupérer le nombre d'abonnés.
 Consultez la console C++ pour voir les résultats de la requête API YouTube.
 
+## Auteur
+
+Mathias , Joris , Damien
