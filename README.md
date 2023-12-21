@@ -17,8 +17,7 @@ Avant de commencer, assurez-vous d'avoir les éléments suivants installés sur 
 1. **Clonage du Projet :**
    ```bash
    git clone https://github.com/HURTELJoris/TPproj-rota3
-   cd votre-projet
-
+   cd TPproj-rota3
 ## Configuration de l'Environnement 
 
 Suivez les instructions spécifiques à votre compilateur pour configurer votre environnement de développement C++.
