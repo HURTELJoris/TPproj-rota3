@@ -1,2 +1,2 @@
-﻿  mywebsocketserver.cpp
-  SERVER CPP YOUTUBE.vcxproj -> C:\Users\MATHIAS LEGENDE\source\repos\SERVER CPP YOUTUBE\Debug\SERVER CPP YOUTUBE.exe
+﻿  moc mywebsocketserver.h
+C:\Users\Joris HURTEL\AppData\Local\QtMsBuild\qt_globals.targets(272,5): error : [QtRunWork] Error starting process /moc: Le fichier spécifié est introuvable

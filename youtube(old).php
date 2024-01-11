@@ -1,3 +1,4 @@
+
 <?php session_start();
 $_SESSION['user_id'] = $row['id']; ?>
 <link rel="stylesheet" href="./stylee.css">
@@ -85,7 +86,7 @@ $_SESSION['user_id'] = $row['id']; ?>
 </svg>
 <header class="page-header">
   <nav>
-
+    
     </a>
     <button class="toggle-mob-menu" aria-expanded="false" aria-label="open menu">
       <svg width="20" height="20" aria-hidden="true">
@@ -96,7 +97,7 @@ $_SESSION['user_id'] = $row['id']; ?>
       <li class="menu-heading">
         <h3>MENU</h3>
       </li>
-
+      
       <li>
         <a href="user.php">
           <svg>
@@ -130,24 +131,24 @@ $_SESSION['user_id'] = $row['id']; ?>
         </a>
       </li>
       <li>
-        <a href="youtube.php">
-          <svg>
-            <use xlink:href="#users"></use>
-          </svg>
-
-          <span>Compteur Youtube</span>
-        </a>
+      <a href="youtube.php">
+        <svg>
+          <use xlink:href="#users"></use>
+         </svg>
+         
+        <span>Compteur Youtube</span>
+      </a>
       </li>
       <li>
-        <a href="deco.php">
-          <svg>
-            <use xlink:href="#users"></use>
-          </svg>
-
-          <span>Déconnexion</span>
-        </a>
+      <a href="deco.php">
+        <svg>
+          <use xlink:href="#users"></use>
+         </svg>
+         
+        <span>Déconnexion</span>
+      </a>
       </li>
-
+      
       <li>
         <div class="switch">
           <input type="checkbox" id="mode" checked>
@@ -177,94 +178,121 @@ $_SESSION['user_id'] = $row['id']; ?>
       </button>
     </form>
     <div class="admin-profile">
-      <span class="greeting">Hello <?php echo  $_SESSION["logname"]; ?></span>
-
+      <span class="greeting">Hello <?php echo  $_SESSION["logname"];?></span>
+      
       <div class="notifications">
         <span class="badge">1</span>
-
+        
         <svg>
           <use xlink:href="#users"></use>
         </svg>
       </div>
     </div>
-  </section>
-  <!DOCTYPE html>
-  <html lang="en">
-
-  <head>
+  </section><!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nombre d'abonné(e)s YouTube</title>
+    <title>Nombre d'abonnés YouTube</title>
     <style>
-      body {
-        background-color: #1a1a1a;
-        /* Couleur de fond sombre */
-        color: #ffffff;
-        /* Couleur du texte */
-        font-family: 'Arial', sans-serif;
-        text-align: center;
-        padding: 50px;
-        margin: 0;
-      }
+        body {
+            background-color: #1a1a1a; /* Couleur de fond sombre */
+            color: #ffffff; /* Couleur du texte */
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
 
-      h1 {
-        font-size: 2em;
-        margin-bottom: 20px;
-      }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
 
-      p {
-        font-size: 1.5em;
-      }
+        p {
+            font-size: 1.5em;
+        }
 
-      img {
-        max-width: 300px;
-        border-radius: 50%;
-        margin-top: 20px;
-      }
+        img {
+            max-width: 300px;
+            border-radius: 50%;
+            margin-top: 20px;
+        }
     </style>
-  </head>
+</head>
+<body>
 
-  <body>
+<!-- HTML -->
+<h1>Nombre d'abonnés YouTube</h1>
+<img id="channelImage" src="" alt="Photo de profil">
+<p id="channelName">Chargement...</p>
+<p id="subscriberCount">Chargement...</p>
 
-    <!-- 
-      HTML : 
-        Partie ajoutée dans la rotation 3 par Joris HURTEL et Mathias SENEPART, élèves de BTS SN2 de décembre 2023 à janvier 2024.
-        
-    -->
-    <h1>Nombre d'abonné(e)s YouTube</h1>
-    <img id="channelImage" src="" alt="Photo de profil">
-    <p id="channelName">Chargement...</p>
-    <p id="subscriberCount">Chargement...</p>
-
-    <!-- 
-    <p id="APIKeys">Fonction API Keys : False, Chargement...</p> A enlever pour la version finale 
-    -->
-
-    <!--
-    <p id="NBRequetes">Chargement...</p>  A enlever pour la version finale
-    -->
-
-    <script type="module">
-      // Importez la classe depuis le fichier externe
-      import Compteur_Histo from './Classes/Compteur_Histo.js';
-
-      // Informations concernant l'API
-      const apiKey1 = "AIzaSyAmTs9KwHabkrc65xzdXbaMN7Wnkm_io44";
-     
-      const apiKey2 = "AIzaSyCLhJz_RWKVRHElQOFUailof1vSBzw7Ylo";
+<script>
+    const apiKey = "AIzaSyCLhJz_RWKVRHElQOFUailof1vSBzw7Ylo";
+    const channelId = "UCrVnM4qoAn7NA5MBZpI4QeA";
     
-      let apiKey = localStorage.getItem('apiKey');
-      //document.getElementById("APIKeys").textContent = `Fonction API Keys : False, ${apiKey}`; //On vérifie qu'on charge bien l'apiKey avec la valeur locale.
+    // Connexion WebSocket
+    const socket = new WebSocket('ws://192.168.64.142:667');  // Assurez-vous que le port correspond à celui du serveur WebSocket C++
 
-      const channelId = "UCXH88XOJR72jvzglmLIOleQ"; //ID : Douzzy Abozo
-      const channelId2 = "UCrVnM4qoAn7NA5MBZpI4QeA"; //ID : Julien Code
+    // Fonction pour envoyer des informations au serveur WebSocket
+    function sendInfoToCpp(info) {
+        socket.send(info);
+    }
+
+    function getChannelInfo() {
+        const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&id=${channelId}&key=${apiKey}`;
+
+        fetch(channelUrl)
+            .then(response => response.json())
+            .then(data => {
+                const channelName = data.items[0].snippet.title;
+                const channelImage = data.items[0].snippet.thumbnails.high.url;
+
+                document.getElementById("channelName").textContent = `Nom de la chaîne : ${channelName}`;
+                document.getElementById("channelImage").src = channelImage;
+
+                // Envoyer le nom de la chaîne au serveur C++
+                sendInfoToCpp(`Nom de la chaîne : ${channelName}`);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération des informations de la chaîne :", error);
+                document.getElementById("channelName").textContent = "Erreur lors de la récupération des informations de la chaîne.";
+            });
+    }
+
+    function getSubscriberCount() {
+        const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const subscriberCount = data.items[0].statistics.subscriberCount;
+                document.getElementById("subscriberCount").textContent = `Nombre d'abonnés actuel : ${subscriberCount}`;
+
+                // Envoyer le nombre d'abonnés au serveur C++
+                sendInfoToCpp(`Nombre d'abonnés actuel : ${subscriberCount}`);
+            })
+            .catch(error => {
+                console.error("Erreur lors de la récupération du nombre d'abonnés :", error);
+                document.getElementById("subscriberCount").textContent = "Erreur lors de la récupération du nombre d'abonnés.";
+            });
+    }
+
+    // Mettre à jour toutes les 30 secondes (ou ajustez selon vos besoins)
+    setInterval(() => {
+        getChannelInfo();
+        getSubscriberCount();
+    }, 3000);
+
+    // Charger le nom de la chaîne, la photo de profil et le nombre d'abonnés au chargement de la page
+    window.onload = () => {
+        getChannelInfo();
+        getSubscriberCount();
+    };
+</script>
 
 
-      // Création d'une instance de la classe Compteur_Histo. Cette classe gère tout le compteur d'abonnée youtube
-      let compteurHisto = new Compteur_Histo(apiKey1, apiKey2, channelId);
- 
-    </script>
-  </body>
-  <script  src="./scriptt.js"></script>
 
-  </html>
+</body>
+</html>
