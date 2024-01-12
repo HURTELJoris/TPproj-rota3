@@ -116,7 +116,7 @@ class Compteur_Histo {
         console.log("Jour du mois actuel", currentDate.getDate());
         //console.log("Jour de la dernière entrée en BDD : ",this.DateBDD);
 
-        if (currentDate.getDate() > this.DateBDD) {
+        if (currentDate.getDate() != this.DateBDD) {
             this.NBRequete = 2;
             localStorage.setItem('NBRequete', this.NBRequete);
         } else {
@@ -156,8 +156,8 @@ class Compteur_Histo {
                     document.getElementById("channelImage").src = channelImage;
                     document.getElementById("subscriberCount").textContent = `Nombre d'abonnés actuel : ${subscriberCount}`;
 
-                    this.sendInfoToCpp(`Nom de la chaîne : ${channelName}`);
-                    this.sendInfoToCpp(`Nombre d'abonnés actuel : ${subscriberCount}`);
+                    this.sendInfoToCpp(` ${channelName}`);
+                    this.sendInfoToCpp(` ${subscriberCount}`);
 
                     resolve();
                 })
